@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Analysis Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="{{ url_for('static', filename='icon.png') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>{{ username }}'s Menu</h3>
+            <button class="close-btn" id="close-sidebar">✖</button>
+        </div>
+        <div class="sidebar-content">
+            <a href="{{ url_for('profile') }}" class="sidebar-item">User Profile</a>
+            <a href="{{ url_for('news') }}" class="sidebar-item">Stock News</a>
+            <a href="{{ url_for('about') }}" class="sidebar-item">About Us</a>
+            <a href="{{ url_for('home') }}" class="sidebar-item active">Dashboard</a>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <header>
+            <button class="menu-btn" id="open-sidebar">☰</button>
+            <h1>Stock Analysis Dashboard</h1>
+            <button id="theme-toggle">🌙</button>
+        </header>
+        
+        <main>
+            <section class="input-section">
+                <form action="/home" method="POST">
+                    <input type="text" name="companies" placeholder="Enter stock names (e.g., Apple, Tesla)" required>
+                    <input type="text" name="date_range" placeholder="Start Date - End Date (YYYY-MM-DD, optional)">
+                    <button type="submit">Analyze</button>
+                </form>
+            </section>
+            
+            <section class="chart-section">
+                {% if show_graph %}
+                    <canvas id="stockChart"></canvas>
+                {% elif message %}
+                    <p>{{ message }}</p>
+                {% endif %}
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Load theme from localStorage
+        document.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark-mode');
+            }
+
+            // Render chart if canvas exists
+            const canvas = document.getElementById('stockChart');
+            if (canvas) {
+                fetch('/data')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            console.error(data.error);
+                            return;
+                        }
+                        const colors = ['#3182ce', '#38a169', '#e53e3e', '#805ad5', '#d69e2e', '#ed8936', '#48bb78', '#9f7aea', '#4299e1', '#ecc94b'];
+                        new Chart(canvas, {
+                            type: 'line',
+                            data: {
+                                labels: data.dates,
+                                datasets: data.datasets.map((ds, index) => ({
+                                    label: ds.label,
+                                    data: ds.data,
+                                    borderColor: colors[index % colors.length],
+                                    fill: false,
+                                    tension: 0.1
+                                }))
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false, // Allow custom sizing
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: 'Stock Prices',
+                                        font: {
+                                            size: 14 // Readable title
+                                        }
+                                    },
+                                    legend: {
+                                        position: 'top',
+                                        labels: {
+                                            boxWidth: 10,
+                                            font: {
+                                                size: 10 // Smaller legend text for mobile
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    x: {
+                                        type: 'time',
+                                        time: {
+                                            unit: 'month', // Monthly intervals
+                                            displayFormats: {
+                                                month: 'MMM' // Short form: Jan, Feb, etc.
+                                            }
+                                        },
+                                        title: {
+                                            display: true,
+                                            text: 'Date'
+                                        },
+                                        ticks: {
+                                            maxTicksLimit: 12, // Limit to ~12 labels (1 per month, max)
+                                            maxRotation: 0,
+                                            minRotation: 0,
+                                            font: {
+                                                size: 10 // Smaller x-axis labels
+                                            }
+                                        }
+                                    },
+                                    y: {
+                                        title: {
+                                            display: true,
+                                            text: 'Price'
+                                        },
+                                        ticks: {
+                                            font: {
+                                                size: 10 // Smaller y-axis labels
+                                            }
+                                        }
+                                    }
+                                },
+                                height: 300 // Default height for mobile
+                            }
+                        });
+                    })
+                    .catch(error => console.error('Error fetching chart data:', error));
+            }
+        });
+
+        // Sidebar toggle
+        const sidebar = document.getElementById('sidebar');
+        const openBtn = document.getElementById('open-sidebar');
+        const closeBtn = document.getElementById('close-sidebar');
+
+        openBtn.addEventListener('click', () => {
+            sidebar.classList.add('open');
+        });
+
+        closeBtn.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+        });
+
+        // Theme toggle
+        document.getElementById('theme-toggle').addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
+
+        // PWA service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
+        }
+    </script>
+</body>
+</html>

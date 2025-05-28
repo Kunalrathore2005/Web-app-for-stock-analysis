@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="{{ url_for('static', filename='icon.png') }}">
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>{{ username }}'s Menu</h3>
+            <button class="close-btn" id="close-sidebar">✖</button>
+        </div>
+        <div class="sidebar-content">
+            <a href="{{ url_for('profile') }}" class="sidebar-item">User Profile</a>
+            <a href="{{ url_for('news') }}" class="sidebar-item">Stock News</a>
+            <a href="{{ url_for('about') }}" class="sidebar-item active">About Us</a>
+            <a href="{{ url_for('home') }}" class="sidebar-item">Dashboard</a>
+
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <header>
+            <button class="menu-btn" id="open-sidebar">☰</button>
+            <h1>About Us</h1>
+            <button id="theme-toggle">🌙</button>
+        </header>
+        
+        <main>
+            <section class="about-section">
+                <h2>About Stock Analysis</h2>
+                <p>Welcome to the team behind the Web Based App for Stock Analysis, a passionate group of developers and financial enthusiasts dedicated to empowering investors with real-time insights. Led by Kunal Dharmendra Rathore, a T.Y.BSc (IT)
+                   student at KLE Society’s Science and Commerce College, Kalamboli, this project was crafted under the esteemed guidance of Asst. Prof. Swapnali Kadge, Head of the Information Technology Department. Our mission is to simplify stock
+                   market analysis by integrating cutting-edge technologies like Flask, yfinance, and Chart.js, providing users with interactive charts, market news, and secure profile management.
+                   This application is the result of collaborative efforts, blending technical expertise with a vision to support individual investors, trading communities, and educational platforms. We are committed to continuous improvement, with 
+                   plans to expand features like portfolio tracking and predictive analytics in the future. Special thanks go to the faculty and peers at KLE Society’s Science and Commerce College
+                   for their support, and to our families for their encouragement throughout this journey.
+                   For inquiries or collaboration, feel free to reach out through the contact details provided in your user profile section (once enhanced with email functionality). Join us in navigating the world of stocks with confidence!.</p>
+                <p>Built with love, our app offers interactive charts powered by Chart.js, real-time news via NewsAPI, and a sleek interface with light and dark modes. Whether you're a seasoned investor or just curious, we're here to simplify your stock journey.</p>
+                <p>Questions? Reach out at <a href="kunalkrathore2005@gmail.com">support@stockapp.com</a>.</p>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Load theme from localStorage
+        document.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark-mode');
+            }
+        });
+
+        // Sidebar toggle
+        const sidebar = document.getElementById('sidebar');
+        const openBtn = document.getElementById('open-sidebar');
+        const closeBtn = document.getElementById('close-sidebar');
+
+        openBtn.addEventListener('click', () => {
+            sidebar.classList.add('open');
+        });
+
+        closeBtn.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+        });
+
+        // Theme toggle
+        document.getElementById('theme-toggle').addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
+
+        // PWA service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
+        }
+    </script>
+</body>
+</html>

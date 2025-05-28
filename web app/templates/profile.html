@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="{{ url_for('static', filename='icon.png') }}">
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>{{ username }}'s Menu</h3>
+            <button class="close-btn" id="close-sidebar">✖</button>
+        </div>
+        <div class="sidebar-content">
+            <a href="{{ url_for('profile') }}" class="sidebar-item active">User Profile</a>
+            <a href="{{ url_for('news') }}" class="sidebar-item">Stock News</a>
+            <a href="{{ url_for('about') }}" class="sidebar-item">About Us</a>
+            <a href="{{ url_for('home') }}" class="sidebar-item">Dashboard</a>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <header>
+            <button class="menu-btn" id="open-sidebar">☰</button>
+            <h1>User Profile</h1>
+            <button id="theme-toggle">🌙</button>
+            <a href="/logout">Logout</a>
+        </header>
+        
+        <main>
+            <section class="profile-section">
+                <h2>{{ username }}'s Profile</h2>
+                {% if message %}
+                    <p class="success-message">{{ message }}</p>
+                {% endif %}
+                <div class="profile-details">
+                    <p><strong>Username:</strong> {{ username }}</p>
+                    <p><strong>Email:</strong> {{ email }}</p>
+                    <p><strong>Join Date:</strong> January 2025</p>
+                </div>
+                <a href="{{ url_for('edit_profile') }}" class="edit-profile-btn">Edit Profile</a>
+                <a href="/logout" class="logout-btn">Logout</a>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Load theme from localStorage
+        document.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark-mode');
+            }
+        });
+
+        // Sidebar toggle
+        const sidebar = document.getElementById('sidebar');
+        const openBtn = document.getElementById('open-sidebar');
+        const closeBtn = document.getElementById('close-sidebar');
+
+        openBtn.addEventListener('click', () => {
+            sidebar.classList.add('open');
+        });
+
+        closeBtn.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+        });
+
+        // Theme toggle
+        document.getElementById('theme-toggle').addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
+
+        // PWA service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
+        }
+    </script>
+</body>
+</html>
